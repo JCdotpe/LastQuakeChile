@@ -10,12 +10,13 @@ android {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
     signingConfigs {
-        lastquakechilesign {
+        /*lastquakechilesign {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
             storeFile file(keystoreProperties['storeFile'])
             storePassword keystoreProperties['storePassword']
-        }
+        }*/
+        release
     }
     compileSdkVersion 28
     buildToolsVersion "28.0.3"
@@ -34,7 +35,7 @@ android {
             shrinkResources true
             useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.lastquakechilesign
+            signingConfig signingConfigs.release
         }
         /*debug {
             debuggable true
@@ -43,13 +44,24 @@ android {
             //ext.enableCrashlytics = true
             //ext.alwaysUpdateBuildId = false
         }*/
-
     }
 
     testOptions { // <-- You need this
         unitTests {
             returnDefaultValues = true
         }
+    }
+
+    def isRunningOnTravis = System.getenv("CI") == "true"
+    if (isRunningOnTravis) {
+        signingConfigs.release.storeFile = file("../test-key.jks")
+        signingConfigs.release.storePassword = System.getenv("keystore_password")
+        signingConfigs.release.keyAlias = System.getenv("keystore_alias")
+        signingConfigs.release.keyPassword = System.getenv("keystore_alias_password")
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
 
