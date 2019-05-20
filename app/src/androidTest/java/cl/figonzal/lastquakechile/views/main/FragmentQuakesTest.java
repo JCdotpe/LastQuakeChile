@@ -42,24 +42,24 @@ import static org.hamcrest.Matchers.allOf;
 public class FragmentQuakesTest {
 
 	@Rule
-	public ActivityTestRule<MainActivity> testRule = new ActivityTestRule<>(MainActivity.class);
+	public final ActivityTestRule<MainActivity> testRule =
+			new ActivityTestRule<>(MainActivity.class);
 
 	private static final int TIME_TO_TEST = 5000;
 	private Context mContext;
-	private SharedPreferences sharedPreferences;
 
-	private static Matcher<View> childAtPosition (
+	private static Matcher<View> childAtPosition(
 			final Matcher<View> parentMatcher, final int position) {
 
 		return new TypeSafeMatcher<View>() {
 			@Override
-			public void describeTo (Description description) {
+			public void describeTo(Description description) {
 				description.appendText("Child at position " + position + " in parent ");
 				parentMatcher.describeTo(description);
 			}
 
 			@Override
-			public boolean matchesSafely (View view) {
+			public boolean matchesSafely(View view) {
 				ViewParent parent = view.getParent();
 				return parent instanceof ViewGroup && parentMatcher.matches(parent)
 						&& view.equals(((ViewGroup) parent).getChildAt(position));
@@ -68,9 +68,11 @@ public class FragmentQuakesTest {
 	}
 
 	@Before
-	public void setup () {
+	public void setup() {
 		mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-		sharedPreferences = testRule.getActivity().getPreferences(Context.MODE_PRIVATE);
+
+		SharedPreferences sharedPreferences =
+				testRule.getActivity().getPreferences(Context.MODE_PRIVATE);
 
 		SharedPreferences.Editor editor = sharedPreferences.edit();
 		editor.putBoolean(mContext.getString(R.string.SHARED_PREF_STATUS_CARD_VIEW_INFO), true);
@@ -78,7 +80,7 @@ public class FragmentQuakesTest {
 	}
 
 	@Test
-	public void test2_click_card_view_info () {
+	public void test2_click_card_view_info() {
 
 		ViewInteraction button = onView(
 				allOf(withId(R.id.btn_info_accept),
@@ -99,14 +101,13 @@ public class FragmentQuakesTest {
 	}
 
 	@Test
-	public void test1_click_on_item () {
+	public void test1_click_on_item() {
 
 		ViewInteraction quakeItem = onView(
 				allOf(withId(R.id.card_view),
 						childAtPosition(
-								allOf(withId(R.id.recycle_view), withContentDescription("List of" +
-												" " +
-												"quakes section"),
+								allOf(withId(R.id.recycle_view),
+										withContentDescription(mContext.getString(R.string.seccion_listado_de_sismos)),
 										childAtPosition(
 												withClassName(Matchers.is("androidx" +
 														".constraintlayout.widget" +

@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -75,7 +76,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 	private View mOverlay;
 
 	@Override
-	public void onCreate (Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		QuakeUtils.checkNightMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_quake_details);
@@ -146,11 +147,11 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 	/**
 	 * Funcion encargada de la logica de los botones flotantes
 	 */
-	private void setFloatingButtons () {
+	private void setFloatingButtons() {
 
 		mFabShare.setOnClickListener(new View.OnClickListener() {
 			@Override
-			public void onClick (View v) {
+			public void onClick(View v) {
 
 				mOverlay = findViewById(R.id.quake_details_container);
 
@@ -166,7 +167,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 
 		mFabFB.setOnClickListener(new View.OnClickListener() {
 			@Override
-			public void onClick (View v) {
+			public void onClick(View v) {
 				Intent mIntent =
 						getPackageManager().getLaunchIntentForPackage(getString(R.string.PACKAGE_NAME_FB));
 
@@ -201,7 +202,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 					mShareDialog.registerCallback(mCallBackManager,
 							new FacebookCallback<Sharer.Result>() {
 								@Override
-								public void onSuccess (Sharer.Result result) {
+								public void onSuccess(Sharer.Result result) {
 									Toast.makeText(getApplicationContext(),
 											getString(R.string.TAG_TOAST_SHARE_FB_OK),
 											Toast.LENGTH_LONG).show();
@@ -213,7 +214,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 								}
 
 								@Override
-								public void onCancel () {
+								public void onCancel() {
 									Toast.makeText(getApplicationContext(),
 											getString(R.string.TAG_TOAST_SHARE_FB_CANCEL),
 											Toast.LENGTH_LONG).show();
@@ -226,7 +227,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 								}
 
 								@Override
-								public void onError (FacebookException error) {
+								public void onError(FacebookException error) {
 									Toast.makeText(getApplicationContext(),
 											getString(R.string.TAG_TOAST_SHARE_FB_ERROR),
 											Toast.LENGTH_LONG).show();
@@ -252,7 +253,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 
 		mFabWSP.setOnClickListener(new View.OnClickListener() {
 			@Override
-			public void onClick (View v) {
+			public void onClick(View v) {
 				Intent mIntent =
 						getPackageManager().getLaunchIntentForPackage(getString(R.string.PACKAGE_NAME_WSP));
 
@@ -293,7 +294,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 
 		mFabGM.setOnClickListener(new View.OnClickListener() {
 			@Override
-			public void onClick (View v) {
+			public void onClick(View v) {
 
 				Intent mIntent =
 						getPackageManager().getLaunchIntentForPackage(getString(R.string.PACKAGE_NAME_GMAIL));
@@ -361,7 +362,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 	 * @param latitud  Latitud del sismo
 	 * @param longitud Longitud del sismo
 	 */
-	private void calculateGMS (String latitud, String longitud) {
+	private void calculateGMS(String latitud, String longitud) {
 
 		//Conversion de mLatitud a dms
 		double mLatUbicacion = Double.parseDouble(Objects.requireNonNull(latitud));
@@ -400,12 +401,13 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 	 *
 	 * @param b Bundle con los datos
 	 */
-	private void dateConfig (Bundle b) {
+	private void dateConfig(Bundle b) {
 
 		//SECCION CONVERSION DE TIEMPO UTC-LOCAL (DEPENDIENDO SI VIENE DE ADAPTER O DE
 		// NOTIFICACION)
 		mFechaLocal = b.getString(getString(R.string.INTENT_FECHA_LOCAL));
 		String mFechaUtc = b.getString(getString(R.string.INTENT_FECHA_UTC));
+
 
 		//SI INTENT VIENE DE ADAPTER
 		//Convertir mFechaLocal a Date
@@ -419,18 +421,27 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 		//Convertir sFechaUtc a Date fecha_utc
 		//Convertir Date fecha_utc a Date fecha_local
 		//Calcular DHMS de Date fecha_local
-		if (mFechaUtc != null) {
-			Date mDateFechaUtc = QuakeUtils.stringToDate(this, mFechaUtc);
-			Date mDateFechaLocal = QuakeUtils.utcToLocal(mDateFechaUtc);
-			mTiempos = QuakeUtils.dateToDHMS(mDateFechaLocal);
+		else {
+
+			if (mFechaUtc != null) {
+				Date mDateFechaUtc = QuakeUtils.stringToDate(this, mFechaUtc);
+				Date mDateFechaLocal = QuakeUtils.utcToLocal(mDateFechaUtc);
+				mTiempos = QuakeUtils.dateToDHMS(mDateFechaLocal);
+
+				//Setear string que será usado en textviews de detalle con la fecha transformada
+				// de utc a local desde notificacion
+				mFechaLocal = QuakeUtils.dateToString(this, mDateFechaLocal);
+
+			}
 		}
+
 	}
 
 
 	/**
 	 * Funcion que abre el floating button menu
 	 */
-	private void showFabMenu () {
+	private void showFabMenu() {
 		mIsFabOpen = true;
 
 		mFabFB.show();
@@ -472,7 +483,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 	/**
 	 * Funcion que cierra el floating button menu
 	 */
-	private void closeFabMenu () {
+	private void closeFabMenu() {
 		mIsFabOpen = false;
 		mFabFB.animate().translationY(0);
 		mFabWSP.animate().translationY(0);
@@ -498,7 +509,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 		mOverlay.setAlpha(0.85f);
 		mOverlay.animate().alpha(0.0f).setDuration(500).setListener(new AnimatorListenerAdapter() {
 			@Override
-			public void onAnimationEnd (Animator animation, boolean isReverse) {
+			public void onAnimationEnd(Animator animation, boolean isReverse) {
 				mOverlay.setVisibility(View.GONE);
 			}
 		});
@@ -506,7 +517,28 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 	}
 
 	@Override
-	public void onBackPressed () {
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		// Respond to the action bar's Up/Home button
+		if (item.getItemId() == android.R.id.home) {
+
+			Log.d(getString(R.string.TAG_INTENT_DETALLE_HOME_UP),
+					getString(R.string.TAG_INTENT_DETALLE_HOME_UP_RESPONSE));
+
+			Crashlytics.log(Log.DEBUG, getString(R.string.TAG_INTENT_DETALLE_HOME_UP),
+					getString(R.string.TAG_INTENT_DETALLE_HOME_UP_RESPONSE));
+
+			Intent intent = new Intent(this, MainActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+			finish();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onBackPressed() {
 
 		if (!mIsFabOpen) {
 			super.onBackPressed();
@@ -519,7 +551,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 		Funcion que permite el callback de facebook
 	*/
 	@Override
-	protected void onActivityResult (int requestCode, int resultCode, @Nullable Intent data) {
+	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		mCallBackManager.onActivityResult(requestCode, resultCode, data);
 	}
@@ -528,7 +560,7 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 	/**
 	 * Funcion que permite setear los textview del detalle con la información procesada
 	 */
-	private void setTextViews () {
+	private void setTextViews() {
 		//Setear titulo de mCiudad en activity
 		Objects.requireNonNull(getSupportActionBar()).setTitle(mCiudad);
 
@@ -586,9 +618,9 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 				.transition(withCrossFade())
 				.listener(new RequestListener<Drawable>() {
 					@Override
-					public boolean onLoadFailed (@Nullable GlideException e, Object model,
-					                             Target<Drawable> target,
-					                             boolean isFirstResource) {
+					public boolean onLoadFailed(@Nullable GlideException e, Object model,
+					                            Target<Drawable> target,
+					                            boolean isFirstResource) {
 						mIvMapa.setImageDrawable(getDrawable(R.drawable.not_found));
 						Log.d(getString(R.string.TAG_INTENT_SHARE_BITMAP),
 								getString(R.string.TAG_INTENT_SHARE_BITMAP_MESSAGE_FAIL));
@@ -599,8 +631,8 @@ public class QuakeDetailsActivity extends AppCompatActivity {
 
 					//No es necesario usarlo (If u want)
 					@Override
-					public boolean onResourceReady (Drawable resource, Object model,
-					                                Target<Drawable> target, DataSource dataSource
+					public boolean onResourceReady(Drawable resource, Object model,
+					                               Target<Drawable> target, DataSource dataSource
 							, boolean isFirstResource) {
 						mBitmapUri = QuakeUtils.getLocalBitmapUri(resource,
 								getApplicationContext());
